@@ -1,0 +1,37 @@
+import openpyxl
+import os
+import nidaqmx
+import matplotlib.pyplot as plt
+import time
+import sys
+
+wb = openpyxl.Workbook()
+ws = wb.active
+filename = 'save_0817_0940.xlsx'
+directory = 'C:/Users/USER/Desktop/업무/세미나/파이썬강의자료/MSE_PRESENTATION/excel_data'
+full_path = os.path.join(directory, filename)
+Data_ai0 = []
+fig, ax = plt.subplots()
+ax.set_xlabel('Voltage')
+ax.set_title('Voltages operation')
+
+with nidaqmx.Task() as task0 :
+    task0.ai_channels.add_ai_voltage_chan("Dev1/ai0")
+    start_time = time.time()
+    while time.time() - start_time < 20:
+        start_time_2 = time.time()
+        voltage = task0.read()
+        Data_ai0.append(voltage) 
+        ax.plot(Data_ai0, color='black')
+        ax.set_xlim(len(Data_ai0) - 50, len(Data_ai0) + 50)
+        plt.pause(0.001)         
+        row = len(Data_ai0)
+        ws.cell(row=row, column=1, value=voltage)         
+        wb.save(full_path)
+        print(time.time()-start_time_2)
+
+        if not plt.fignum_exists(fig.number):
+            sys.exit(0)
+
+print("Excel file saved successfully.")
+
